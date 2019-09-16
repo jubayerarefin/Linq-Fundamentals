@@ -21,7 +21,7 @@ namespace LINQ
             for (int i = 0; i < 5; i++)
             {
                 FileInfo file = files[i];
-                Console.WriteLine($"{file.Name} : {file.Length}");
+                Console.WriteLine($"{file.Name,-20} : {file.Length,10:N0}");
             }
         }
     }
