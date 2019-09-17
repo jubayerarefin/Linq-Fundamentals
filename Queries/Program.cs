@@ -8,6 +8,12 @@ namespace Queries
     {
         static void Main(string[] args)
         {
+            var numbers = MyLinq.Random().Where(n => n > 0.5).Take(10);
+            foreach (var number in numbers)
+            {
+                Console.WriteLine(number);
+            }
+
             var movies = new List<Movie>
             {
                 new Movie{Title="The Dark Knight", Rating=8.9f,Year=2008},
@@ -20,7 +26,7 @@ namespace Queries
             query_1 = movies.Where(m => m.Year > 2000)
                             /**
                              * OrderBy is a Non streaming operator where Order is a streaming operator
-                             * So it is helpful to filter first the sort
+                             * So it is better to filter first then sort
                              */
                             .OrderByDescending(m => m.Rating);
 
