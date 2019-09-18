@@ -11,10 +11,30 @@ namespace Cars
         {
             var cars = ProcesCars("fuel.csv");
             var manufacturers = ProcessManufacturers("manufacturers.csv");
+
+            //Query syntax
+            var query_5 = from car in cars
+                          group car
+                          by car.Manufacturer;
+
+            Console.Write("**Query_5**\n");
+            Console.Write("**Car Summary Begins**\n");
+            //foreach (var car in query)
+            foreach (var group in query_5)
+            {
+                Console.WriteLine(group.Key);
+
+                foreach (var car in group.OrderByDescending(c => c.Combined).Take(2))
+                {
+                    Console.WriteLine($"\t{car.Name} : {car.Combined}");
+                }
+            }
+            Console.WriteLine("\n**Car Summary Ends**\n");
+
             //Query syntax
             var query = from car in cars
                         join manufacturer in manufacturers
-                            on car.Manufacturer equals manufacturer.Name
+                            on new { car.Manufacturer, car.Year } equals new { Manufacturer = manufacturer.Name, manufacturer.Year }
                         orderby car.Combined descending, car.Name ascending
                         select new
                         {
@@ -22,10 +42,20 @@ namespace Cars
                             car.Name,
                             car.Combined
                         };
-            //Extension method syntax with Select projection
+            Console.Write("**Query**\n");
+            Console.Write("**Car Summary Begins**\n");
+            //foreach (var car in query)
+            foreach (var car in query)
+            {
+                Console.WriteLine($"{car.Headquarters,-7} : {car.Name,-32} : {car.Combined}");
+            }
+            Console.WriteLine("\n**Car Summary Ends**\n");
+
+            //Extension method syntax with inline projection within Join insteadof Select
             var query_3 = cars.Join(manufacturers,
-                                    c => c.Manufacturer,
-                                    m => m.Name, (c, m) => new
+                                    c => new { c.Manufacturer, c.Year },
+                                    m => new { Manufacturer = m.Name, m.Year },
+                                    (c, m) => new
                                     {
                                         m.Headquarters,
                                         c.Name,
@@ -34,6 +64,7 @@ namespace Cars
                                .OrderByDescending(c => c.Combined)
                                .ThenBy(c => c.Name);
 
+            Console.Write("**Query_3**\n");
             Console.Write("**Car Summary Begins**\n");
             //foreach (var car in query)
             foreach (var car in query_3)
