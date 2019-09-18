@@ -95,6 +95,60 @@ namespace Cars
             }
             Console.WriteLine("\n**Car Summary Ends**\n");
 
+            //Query method syntax
+            var query_9 = from car in cars
+                          group car by car.Manufacturer into carGroup
+                          select new
+                          {
+                              Name = carGroup.Key,
+                              Max = carGroup.Max(c => c.Combined),
+                              Min = carGroup.Min(c => c.Combined),
+                              Avg = carGroup.Average(c => c.Combined)
+                          } into result
+                          orderby result.Max descending
+                          select result;
+
+            Console.Write("**Query_9**\n");
+            Console.Write("**Car Summary Begins**\n");
+            foreach (var group in query_9)
+            {
+                Console.WriteLine($"{group.Name}");
+                Console.WriteLine($"\t{group.Max}");
+                Console.WriteLine($"\t{group.Min}");
+                Console.WriteLine($"\t{group.Avg}");
+
+            }
+            Console.WriteLine("\n**Car Summary Ends**\n");
+
+            //Extension method syntax for Aggregration with Accumulator
+            var query_10 = cars.GroupBy(c => c.Manufacturer)
+                .Select(g =>
+                {
+                    var results = g.Aggregate(new CarStatistics(), (acc, c) => acc.Accumulate(c),
+                        acc => acc.Compute());
+
+                    return new
+                    {
+                        Name = g.Key,
+                        Avg = results.Average,
+                        results.Min,
+                        results.Max
+                    };
+                })
+                .OrderByDescending(r => r.Max);
+
+            Console.Write("**Query_10**\n");
+            Console.Write("**Car Summary Begins**\n");
+            foreach (var group in query_10)
+            {
+                Console.WriteLine($"{group.Name}");
+                Console.WriteLine($"\t{group.Max}");
+                Console.WriteLine($"\t{group.Min}");
+                Console.WriteLine($"\t{group.Avg}");
+
+            }
+            Console.WriteLine("\n**Car Summary Ends**\n");
+
             //Query syntax
             var query = from car in cars
                         join manufacturer in manufacturers
@@ -207,6 +261,38 @@ namespace Cars
             */
         }
     }
+    public class CarStatistics
+    {
+        public CarStatistics()
+        {
+            Max = Int32.MinValue;
+            Min = Int32.MaxValue;
+        }
+
+        public CarStatistics Accumulate(Car car)
+        {
+            Count += 1;
+            Total += car.Combined;
+            Max = Math.Max(Max, car.Combined);
+            Min = Math.Min(Min, car.Combined);
+
+            return this;
+        }
+
+        public CarStatistics Compute()
+        {
+            Average = Total / Count;
+
+            return this;
+        }
+
+        public int Max { get; set; }
+        public int Min { get; set; }
+        public int Total { get; set; }
+        public int Count { get; set; }
+        public double Average { get; set; }
+    }
+
     public static class CarExtensions
     {
         public static IEnumerable<Car> ToCar(this IEnumerable<string> source)
