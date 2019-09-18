@@ -22,7 +22,7 @@ namespace Cars
                             car.Name,
                             car.Combined
                         };
-            //Extension method syntax
+            //Extension method syntax with Select projection
             var query_3 = cars.Join(manufacturers,
                                     c => c.Manufacturer,
                                     m => m.Name, (c, m) => new
@@ -38,7 +38,7 @@ namespace Cars
             //foreach (var car in query)
             foreach (var car in query_3)
             {
-                Console.WriteLine($"{car.Headquarters} : {car.Name} : {car.Combined}");
+                Console.WriteLine($"{car.Headquarters,-7} : {car.Name,-32} : {car.Combined}");
             }
             Console.WriteLine("\n**Car Summary Ends**\n");
 
