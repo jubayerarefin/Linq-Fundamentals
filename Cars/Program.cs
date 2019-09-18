@@ -15,16 +15,80 @@ namespace Cars
             //Query syntax
             var query_5 = from car in cars
                           group car
-                          by car.Manufacturer;
+                          by car.Manufacturer.ToUpper() into manufacturer
+                          orderby manufacturer.Key
+                          select manufacturer;
 
             Console.Write("**Query_5**\n");
             Console.Write("**Car Summary Begins**\n");
-            //foreach (var car in query)
             foreach (var group in query_5)
             {
                 Console.WriteLine(group.Key);
 
                 foreach (var car in group.OrderByDescending(c => c.Combined).Take(2))
+                {
+                    Console.WriteLine($"\t{car.Name} : {car.Combined}");
+                }
+            }
+            Console.WriteLine("\n**Car Summary Ends**\n");
+
+            //Extension method syntax
+            var query_6 = cars.GroupBy(c => c.Manufacturer.ToUpper())
+                              .OrderBy(g => g.Key);
+
+            Console.Write("**Query_6**\n");
+            Console.Write("**Car Summary Begins**\n");
+            foreach (var group in query_6)
+            {
+                Console.WriteLine(group.Key);
+
+                foreach (var car in group.OrderByDescending(c => c.Combined).Take(2))
+                {
+                    Console.WriteLine($"\t{car.Name} : {car.Combined}");
+                }
+            }
+            Console.WriteLine("\n**Car Summary Ends**\n");
+
+            //Query method syntax
+            var query_7 = from manufacturer in manufacturers
+                          join car in cars on manufacturer.Name equals car.Manufacturer
+                          into carGroup
+                          orderby manufacturer.Name
+                          select new
+                          {
+                              Manufacturer = manufacturer,
+                              Cars = carGroup
+                          };
+
+            Console.Write("**Query_7**\n");
+            Console.Write("**Car Summary Begins**\n");
+            foreach (var group in query_7)
+            {
+                Console.WriteLine($"{group.Manufacturer.Name} : {group.Manufacturer.Headquarters}");
+
+                foreach (var car in group.Cars.OrderByDescending(c => c.Combined).Take(2))
+                {
+                    Console.WriteLine($"\t{car.Name} : {car.Combined}");
+                }
+            }
+            Console.WriteLine("\n**Car Summary Ends**\n");
+
+            //Extension method syntax
+            var query_8 = manufacturers.GroupJoin(cars, m => m.Name, c => c.Manufacturer,
+                (m, g) => new
+                {
+                    Manufacturer = m,
+                    Cars = g
+                })
+                .OrderBy(m => m.Manufacturer.Name);
+
+            Console.Write("**Query_8**\n");
+            Console.Write("**Car Summary Begins**\n");
+            foreach (var group in query_8)
+            {
+                Console.WriteLine($"{group.Manufacturer.Name} : {group.Manufacturer.Headquarters}");
+
+                foreach (var car in group.Cars.OrderByDescending(c => c.Combined).Take(2))
                 {
                     Console.WriteLine($"\t{car.Name} : {car.Combined}");
                 }
@@ -44,7 +108,6 @@ namespace Cars
                         };
             Console.Write("**Query**\n");
             Console.Write("**Car Summary Begins**\n");
-            //foreach (var car in query)
             foreach (var car in query)
             {
                 Console.WriteLine($"{car.Headquarters,-7} : {car.Name,-32} : {car.Combined}");
@@ -66,7 +129,6 @@ namespace Cars
 
             Console.Write("**Query_3**\n");
             Console.Write("**Car Summary Begins**\n");
-            //foreach (var car in query)
             foreach (var car in query_3)
             {
                 Console.WriteLine($"{car.Headquarters,-7} : {car.Name,-32} : {car.Combined}");
