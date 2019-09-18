@@ -9,7 +9,39 @@ namespace Cars
     {
         static void Main(string[] args)
         {
-            var cars = ProcesFile("fuel.csv");
+            var cars = ProcesCars("fuel.csv");
+            var manufacturers = ProcessManufacturers("manufacturers.csv");
+            //Query syntax
+            var query = from car in cars
+                        join manufacturer in manufacturers
+                            on car.Manufacturer equals manufacturer.Name
+                        orderby car.Combined descending, car.Name ascending
+                        select new
+                        {
+                            manufacturer.Headquarters,
+                            car.Name,
+                            car.Combined
+                        };
+            //Extension method syntax
+            var query_3 = cars.Join(manufacturers,
+                                    c => c.Manufacturer,
+                                    m => m.Name, (c, m) => new
+                                    {
+                                        m.Headquarters,
+                                        c.Name,
+                                        c.Combined
+                                    })
+                               .OrderByDescending(c => c.Combined)
+                               .ThenBy(c => c.Name);
+
+            Console.Write("**Car Summary Begins**\n");
+            //foreach (var car in query)
+            foreach (var car in query_3)
+            {
+                Console.WriteLine($"{car.Headquarters} : {car.Name} : {car.Combined}");
+            }
+            Console.WriteLine("\n**Car Summary Ends**\n");
+
             //var query_1 = cars.OrderByDescending(c => c.Combined).ThenBy(c => c.Name);
             var query_1 = from car in cars
                           where car.Manufacturer == "BMW" && car.Year == 2016
@@ -33,12 +65,12 @@ namespace Cars
 
             var result_1 = cars.Any(c => c.Manufacturer == "Ford");
 
-            var result_2 = cars.SelectMany(c => c.Name);
+            //var result_2 = cars.SelectMany(c => c.Name);
 
-            foreach (var character in result_2)
-            {
-                Console.WriteLine(character);
-            }
+            //foreach (var character in result_2)
+            //{
+            //    Console.WriteLine(character);
+            //}
 
             Console.WriteLine($"{result_1}");
 
@@ -48,7 +80,25 @@ namespace Cars
             }
         }
 
-        private static List<Car> ProcesFile(string path)
+        private static List<Manufacturer> ProcessManufacturers(string path)
+        {
+            var query = File.ReadAllLines(path)
+                .Skip(1)
+                .Where(l => l.Length > 1)
+                .Select(l =>
+                {
+                    var columns = l.Split(",");
+                    return new Manufacturer
+                    {
+                        Name = columns[0],
+                        Headquarters = columns[1],
+                        Year = int.Parse(columns[2]),
+                    };
+                });
+            return query.ToList();
+        }
+
+        private static List<Car> ProcesCars(string path)
         {
             var query = File.ReadAllLines(path)
                 .Skip(1)
