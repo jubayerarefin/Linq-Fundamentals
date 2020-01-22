@@ -145,7 +145,6 @@ namespace Cars
                 Console.WriteLine($"\t{group.Max}");
                 Console.WriteLine($"\t{group.Min}");
                 Console.WriteLine($"\t{group.Avg}");
-
             }
             Console.WriteLine("\n**Car Summary Ends**\n");
 
